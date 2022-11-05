@@ -8,6 +8,8 @@
 
 int width = 80;
 int center = 0;
+int convert_to_spaces = 0;
+
 int paragraph_count = 0;
 int paragraph_line_count = 0;
 int line_count = 0;
@@ -26,6 +28,10 @@ char buf[BUFSIZE];
 int indent_len = 0;
 int indent_width = 0;
 char indent[INDENTSIZE];
+
+int pindent_len = 0;
+int pindent_width = 0;
+char pindent[INDENTSIZE];
 
 #define COMMENTSIZE 2
 int comment_len = 0;
@@ -74,7 +80,7 @@ void process_line_center () {
 void print_prefix () {
     output_width = 0;
     if (indent_len) {
-        printf("%.*s", indent_len, indent);
+        printf("%.*s", pindent_len, pindent);
         output_width += indent_width;
     }
     if (comment_len) {
@@ -166,6 +172,33 @@ void end_paragraph () {
     paragraph_line_count = 0;
 }
 
+void process_indent () {
+    if (convert_to_spaces) {
+        pindent_len = 0;
+        for (int i = 0; i < indent_len; i++) {
+            char c = indent[i];
+            if (c == '\t') {
+                pindent_len += 4;
+            }
+            else {
+                pindent_len += 1;
+            }
+        }
+        if (pindent_len > INDENTSIZE) {
+            fprintf(stderr, "Indent can't be larger than %d characters\n", INDENTSIZE);
+            exit(1);
+        }
+        for (int i = 0; i < pindent_len; i++) {
+            pindent[i] = ' ';
+        }
+    }
+    else {
+        memcpy(pindent, indent, indent_len);
+        pindent_len = indent_len;
+        pindent_width = indent_width;
+    }
+}
+
 void process_line () {
     int cur_indent_len = 0;
     int cur_indent_width = 0;
@@ -248,6 +281,8 @@ void process_line () {
         indent_len = cur_indent_len;
         indent_width = cur_indent_width;
 
+        process_indent();
+
         if (cur_comment_len > COMMENTSIZE) {
             fprintf(stderr, "Comment start can't be larger than %d characters\n", COMMENTSIZE);
             exit(1);
@@ -315,6 +350,7 @@ int main (int argc, char **argv) {
     struct option longopts[] = {
         {"w", required_argument, NULL, 'w'},
         {"c", no_argument, NULL, 'c'},
+        {"s", no_argument, NULL, 's'},
         {"h", no_argument, NULL, 'h'},
         {NULL, 0, NULL, 0}
     };
@@ -327,6 +363,9 @@ int main (int argc, char **argv) {
             break;
         case 'c':
             center = 1;
+            break;
+        case 's':
+            convert_to_spaces = 1;
             break;
         case 'h':
             usage();
