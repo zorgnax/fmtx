@@ -11,13 +11,15 @@ int center = 0;
 int convert_to_spaces = 0;
 
 int paragraph_count = 0;
+int line_count = 0;
+
 int paragraph_line_count = 0;
 int paragraph_only_whitespace = 0;
-int line_count = 0;
 int word_count = 0;
 int output_width = 0;
 int line_start_len = 0;
 int line_start_width = 0;
+int prefix_count = 0;
 
 #define BUFSIZE 1024
 int buf_len = 0;
@@ -94,7 +96,7 @@ void print_prefix () {
         output_width += pcomment_len + 1;
     }
     if (item_len) {
-        if (word_count) {
+        if (prefix_count) {
             printf("%*s ", item_len, "");
         }
         else {
@@ -102,6 +104,7 @@ void print_prefix () {
         }
         output_width += item_len + 1;
     }
+    prefix_count++;
 }
 
 int get_char_len (char c) {
@@ -234,8 +237,9 @@ void end_paragraph () {
         print_prefix();
     }
     word_count = 0;
-    paragraph_count++;
     paragraph_line_count = 0;
+    prefix_count = 0;
+    paragraph_count++;
 }
 
 void process_indent () {
