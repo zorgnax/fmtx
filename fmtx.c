@@ -89,6 +89,46 @@ void print_prefix () {
     }
 }
 
+int get_char_len (char c) {
+    int len = 0;
+    if ((c & 0x80) == 0x00) { // byte is 0*** ****
+        len = 1;
+    }
+    else if ((c & 0xe0) == 0xc0) { // byte is 110* ****
+        len = 2;
+    }
+    else if ((c & 0xf0) == 0xe0) { // byte is 1110 ****
+        len = 3;
+    }
+    else if ((c & 0xf8) == 0xf0) { // byte is 1111 0***
+        len = 4;
+    }
+    else if ((c & 0xfc) == 0xf8) { // byte is 1111 10**
+        len = 5;
+    }
+    else if ((c & 0xfe) == 0xfc) { // byte is 1111 110*
+        len = 6;
+    }
+    else { // not a valid start byte for utf8
+        len = 1;
+    }
+    return len;
+}
+
+int get_str_width (char *str, int len) {
+    // Assuming each unicode character is 1 width which is not true
+    // but for the most part it is. A character like ☃ is 3 bytes long
+    // but 1 character wide.
+    int width = 0;
+    for (int i = 0; i < len; i++) {
+        char c = str[i];
+        int clen = get_char_len(c);
+        width += 1;
+        i += clen - 1;
+    }
+    return width;
+}
+
 void process_word (char *word, int word_len) {
     if (line_start_full_width >= width) {
         if (word_count) {
@@ -100,40 +140,43 @@ void process_word (char *word, int word_len) {
         return;
     }
 
+    int word_width = get_str_width(word, word_len);
+
     if (word_count == 0) {
         print_prefix();
     }
-    else if (output_width + 1 + word_len <= width) {
+    else if (output_width + 1 + word_width <= width) {
         printf(" ");
         output_width++;
     }
-    else if (line_start_full_width + word_len > width && output_width + 1 < width) {
+    else if (line_start_full_width + word_width > width && output_width + 1 < width) {
         // the word can't fit on a line by itself
         // and at least one character can fit on the current line
-        printf(" ");
-        output_width++;
+        if (output_width > line_start_full_width) {
+            printf(" ");
+            output_width++;
+        }
     }
     else {
         printf("\n");
         print_prefix();
     }
 
-    if (output_width + word_len <= width) {
+    if (output_width + word_width <= width) {
         printf("%.*s", word_len, word);
-        output_width += word_len;
+        output_width += word_width;
     }
     else {
-        int remaining_len = word_len;
-        int word_offset = 0;
-        while (output_width + remaining_len > width) {
-            int chunk_len = width - output_width;
-            printf("%.*s\n", chunk_len, word + word_offset);
-            print_prefix();
-            word_offset += chunk_len;
-            remaining_len -= chunk_len;
+        for (int i = 0; i < word_len; i++) {
+            int char_len = get_char_len(word[i]);
+            printf("%.*s", char_len, word + i);
+            i += char_len - 1;
+            output_width += 1;
+            if (output_width >= width) {
+                printf("\n");
+                print_prefix();
+            }
         }
-        printf("%.*s", remaining_len, word + word_offset);
-        output_width += remaining_len;
     }
 }
 
@@ -395,10 +438,9 @@ int main (int argc, char **argv) {
 }
 
 // TODO
-// make sure if I have to break a word, multibyte characters arent broken up
-// -s convert indents to spaces if they contains tabs
 // bullets
 // numbered items
 // lettered items
 // roman numeraled items
+// test program
 
