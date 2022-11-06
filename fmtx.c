@@ -57,9 +57,9 @@ void usage () {
         "Usage: fmtx [options] file...\n"
         "\n"
         "Options:\n"
-        "    -w width  width of line\n"
         "    -c        center on line\n"
-        "    -h        help text\n";
+        "    -h        help text\n"
+        "    -w width  width of line\n";
     puts(str);
     exit(0);
 }
@@ -510,10 +510,6 @@ void process_buf () {
             line[line_len++] = c;
         }
     }
-    if (line_len) {
-        process_line();
-    }
-    end_paragraph();
 }
 
 void process_file (int fd) {
@@ -536,6 +532,10 @@ void process_file (int fd) {
             process_buf();
         }
     }
+    if (line_len) {
+        process_line();
+    }
+    end_paragraph();
 
     close(fd);
 }
@@ -589,9 +589,6 @@ int main (int argc, char **argv) {
 }
 
 // TODO
-// bullets
-// numbered items
-// lettered items
-// roman numeraled items
 // test program
+// create a README
 //
