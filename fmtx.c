@@ -33,9 +33,12 @@ int pindent_len = 0;
 int pindent_width = 0;
 char pindent[INDENTSIZE];
 
-#define COMMENTSIZE 2
+#define COMMENTSIZE 256
 int comment_len = 0;
 char comment[COMMENTSIZE];
+
+int pcomment_len = 0;
+char pcomment[COMMENTSIZE];
 
 int line_size = 256;
 int line_len = 0;
@@ -81,11 +84,11 @@ void print_prefix () {
     output_width = 0;
     if (indent_len) {
         printf("%.*s", pindent_len, pindent);
-        output_width += indent_width;
+        output_width += pindent_width;
     }
     if (comment_len) {
-        printf("%.*s ", comment_len, comment);
-        output_width += comment_len + 1;
+        printf("%.*s ", pcomment_len, pcomment);
+        output_width += pcomment_len + 1;
     }
 }
 
@@ -242,6 +245,52 @@ void process_indent () {
     }
 }
 
+void process_comment () {
+    // for comments like "> >>" we collapse the spaces to ">>>"
+    pcomment_len = 0;
+    for (int i = 0; i < comment_len; i++) {
+        char c = comment[i];
+        if (c != ' ') {
+            pcomment[pcomment_len++] = c;
+        }
+    }
+}
+
+int parse_comment (char *str, int str_len) {
+    // simple comments are ones that start with one of the strings
+    // in the comments array like # or //
+    int comment_len = 0;
+    for (int i = 0; i < comments_count; i++) {
+        char *pcomment = comments[i];
+        int pcomment_len = strlen(pcomment);
+        if (pcomment_len <= str_len && strncmp(str, pcomment, pcomment_len) == 0) {
+            comment_len = pcomment_len;
+            return comment_len;
+        }
+    }
+
+    // this script also considers mail quotations like > >> as comments
+    for (int i = 0; i < str_len; i++) {
+        char c = str[i];
+        if (c == '>' || c == ' ') {
+            comment_len++;
+        }
+        else {
+            break;
+        }
+    }
+    for (int i = comment_len - 1; i >= 0; i--) {
+        char c = str[i];
+        if (c == ' ') {
+            comment_len--;
+        }
+        else {
+            break;
+        }
+    }
+    return comment_len;
+}
+
 void process_line () {
     int cur_indent_len = 0;
     int cur_indent_width = 0;
@@ -263,16 +312,8 @@ void process_line () {
     line_start_width = cur_indent_width;
 
     char *cur_comment = line + cur_indent_len;
-    int cur_comment_len = 0;
+    int cur_comment_len = parse_comment(cur_comment, line_len - line_start_len);
 
-    for (int i = 0; i < comments_count; i++) {
-        char *pcomment = comments[i];
-        int len = strlen(pcomment);
-        if (line_len - line_start_len >= len && strncmp(cur_comment, pcomment, len) == 0) {
-            cur_comment_len = len;
-            break;
-        }
-    }
     line_start_len += cur_comment_len;
     line_start_width += cur_comment_len;
 
@@ -323,7 +364,6 @@ void process_line () {
         memcpy(indent, line, cur_indent_len);
         indent_len = cur_indent_len;
         indent_width = cur_indent_width;
-
         process_indent();
 
         if (cur_comment_len > COMMENTSIZE) {
@@ -332,6 +372,7 @@ void process_line () {
         }
         memcpy(comment, cur_comment, cur_comment_len);
         comment_len = cur_comment_len;
+        process_comment();
     }
 
     if (center) {
@@ -443,4 +484,5 @@ int main (int argc, char **argv) {
 // lettered items
 // roman numeraled items
 // test program
-
+// mail quotations that start with any number of "> >> >" collapse that into ">>>> "
+//
