@@ -22,9 +22,6 @@ int line_size = 256;
 int line_len = 0;
 char *line = NULL;
 
-char *comments[] = {"//", "#"};
-int comments_count = sizeof(comments) / sizeof(comments[0]);
-
 #define INDENTSIZE 256
 #define COMMENTSIZE 256
 #define ITEMSIZE 128
@@ -313,16 +310,16 @@ void process_comment () {
 }
 
 int parse_comment (char *str, int str_len) {
-    // simple comments are ones that start with one of the strings
-    // in the comments array like # or //
+    // simple comments are ones that start with // or #
     int comment_len = 0;
-    for (int i = 0; i < comments_count; i++) {
-        char *pcomment = comments[i];
-        int pcomment_len = strlen(pcomment);
-        if (pcomment_len <= str_len && strncmp(str, pcomment, pcomment_len) == 0) {
-            comment_len = pcomment_len;
-            return comment_len;
-        }
+    if (str_len >= 2 && strncmp(str, "//", 2) == 0) {
+        comment_len = 2;
+    }
+    else if (str_len >= 1 && strncmp(str, "#", 1) == 0) {
+        comment_len = 1;
+    }
+    if (comment_len) {
+        return comment_len;
     }
 
     // this script also considers mail quotations like > >> as comments
