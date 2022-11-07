@@ -12,38 +12,11 @@ int convert_to_spaces = 0;
 
 int paragraph_count = 0;
 int line_count = 0;
-
-int paragraph_line_count = 0;
-int paragraph_only_whitespace = 0;
-int word_count = 0;
 int output_width = 0;
-int line_start_len = 0;
-int line_start_width = 0;
-int prefix_count = 0;
 
 #define BUFSIZE 1024
 int buf_len = 0;
 char buf[BUFSIZE];
-
-#define INDENTSIZE 256
-int indent_len = 0;
-int indent_width = 0;
-char indent[INDENTSIZE];
-
-int pindent_len = 0;
-int pindent_width = 0;
-char pindent[INDENTSIZE];
-
-#define COMMENTSIZE 256
-int comment_len = 0;
-char comment[COMMENTSIZE];
-
-int pcomment_len = 0;
-char pcomment[COMMENTSIZE];
-
-#define ITEMSIZE 128
-int item_len = 0;
-char item[ITEMSIZE];
 
 int line_size = 256;
 int line_len = 0;
@@ -51,6 +24,38 @@ char *line = NULL;
 
 char *comments[] = {"//", "#"};
 int comments_count = sizeof(comments) / sizeof(comments[0]);
+
+#define INDENTSIZE 256
+#define COMMENTSIZE 256
+#define ITEMSIZE 128
+
+typedef struct {
+    int line_count;
+    int word_count;
+    int prefix_count;
+    int only_whitespace;
+    int line_start_len;
+    int line_start_width;
+
+    int indent_len;
+    int indent_width;
+    char indent[INDENTSIZE];
+
+    int pindent_len;
+    int pindent_width;
+    char pindent[INDENTSIZE];
+
+    int comment_len;
+    char comment[COMMENTSIZE];
+
+    int pcomment_len;
+    char pcomment[COMMENTSIZE];
+
+    int item_len;
+    char item[ITEMSIZE];
+
+} para_t;
+para_t para = {0};
 
 void usage () {
     char str[] =
@@ -65,46 +70,62 @@ void usage () {
 }
 
 void process_line_center () {
-    int trailing_ws_len = 0;
+    int indent_len = 0;
     for (int i = 0; i < line_len; i++) {
-        char c = line[line_len - i - 1];
+        char c = line[i];
         if (c == ' ' || c == '\t') {
-            trailing_ws_len++;
+            indent_len++;
         }
         else {
             break;
         }
     }
-    int trimmed_line_len = line_len - indent_len - trailing_ws_len;
-    if (trimmed_line_len > width) {
-        printf("%.*s\n", trimmed_line_len, line + indent_len);
+    int trailing_len = 0;
+    for (int i = line_len - 1; i >= 0; i--) {
+        char c = line[i];
+        if (c == ' ' || c == '\t') {
+            trailing_len++;
+        }
+        else {
+            break;
+        }
+    }
+    int trimmed_len = line_len - indent_len - trailing_len;
+    if (trimmed_len > width) {
+        printf("%.*s\n", trimmed_len, line + indent_len);
     }
     else {
-        int center_indent_len = (width - trimmed_line_len) / 2;
-        printf("%*s%.*s\n", center_indent_len, "", trimmed_line_len, line + indent_len);
+        int center_len = (width - trimmed_len) / 2;
+        printf("%*s%.*s\n", center_len, "", trimmed_len, line + indent_len);
     }
 }
 
 void print_prefix () {
     output_width = 0;
-    if (pindent_len) {
-        printf("%.*s", pindent_len, pindent);
-        output_width += pindent_width;
+    if (para.pindent_len) {
+        printf("%.*s", para.pindent_len, para.pindent);
+        output_width += para.pindent_width;
     }
-    if (pcomment_len) {
-        printf("%.*s ", pcomment_len, pcomment);
-        output_width += pcomment_len + 1;
+    if (para.pcomment_len) {
+        printf("%.*s", para.pcomment_len, para.pcomment);
+        output_width += para.pcomment_len;
     }
-    if (item_len) {
-        if (prefix_count) {
-            printf("%*s ", item_len, "");
+    if (para.item_len) {
+        if (para.prefix_count) {
+            printf("%*s", para.item_len, "");
         }
         else {
-            printf("%.*s ", item_len, item);
+            printf("%.*s", para.item_len, para.item);
         }
-        output_width += item_len + 1;
+        output_width += para.item_len;
     }
-    prefix_count++;
+    if (para.pcomment_len || para.item_len) {
+        if (para.word_count || !para.line_count) {
+            printf(" ");
+            output_width += 1;
+        }
+    }
+    para.prefix_count++;
 }
 
 int get_char_len (char c) {
@@ -148,8 +169,8 @@ int get_str_width (char *str, int len) {
 }
 
 void process_word (char *word, int word_len) {
-    if (line_start_width >= width) {
-        if (word_count) {
+    if (para.line_start_width >= width) {
+        if (para.word_count) {
             printf("\n");
         }
         print_prefix();
@@ -159,18 +180,24 @@ void process_word (char *word, int word_len) {
     }
 
     int word_width = get_str_width(word, word_len);
-
-    if (word_count == 0) {
+    if (para.word_count == 0) {
         print_prefix();
     }
+
+    // if the word can fit on the current line after a space
     else if (output_width + 1 + word_width <= width) {
-        printf(" ");
-        output_width++;
+        // if were not at the start of the line
+        if (output_width > para.line_start_width) {
+            printf(" ");
+            output_width++;
+        }
     }
-    else if (line_start_width + word_width > width && output_width + 1 < width) {
-        // the word can't fit on a line by itself
-        // and at least one character can fit on the current line
-        if (output_width > line_start_width) {
+
+    // the word can't fit on a line by itself
+    // and at least one character can fit on the current line
+    else if (para.line_start_width + word_width > width && output_width + 1 < width) {
+        // if were not at the start of the line
+        if (output_width > para.line_start_width) {
             printf(" ");
             output_width++;
         }
@@ -187,6 +214,10 @@ void process_word (char *word, int word_len) {
     else {
         for (int i = 0; i < word_len; i++) {
             int char_len = get_char_len(word[i]);
+            if (i + char_len > word_len) {
+                // the character says it should be longer than it is
+                char_len = 1;
+            }
             printf("%.*s", char_len, word + i);
             i += char_len - 1;
             output_width += 1;
@@ -198,15 +229,15 @@ void process_word (char *word, int word_len) {
     }
 }
 
-void process_line_wrap () {
+void process_line_words () {
     int word_len = 0;
-    char *word = line + line_start_len;
-    for (int i = line_start_len; i < line_len; i++) {
+    char *word = line + para.line_start_len;
+    for (int i = para.line_start_len; i < line_len; i++) {
         char c = line[i];
         if (c == ' ' || c == '\t') {
             if (word_len) {
                 process_word(word, word_len);
-                word_count++;
+                para.word_count++;
                 word_len = 0;
             }
         }
@@ -219,63 +250,64 @@ void process_line_wrap () {
     }
     if (word_len) {
         process_word(word, word_len);
-        word_count++;
+        para.word_count++;
         word_len = 0;
     }
 }
 
 void end_paragraph () {
-    if (word_count) {
+    if (para.word_count) {
         printf("\n");
     }
-    else if (paragraph_only_whitespace) {
-        for (int i = 0; i < paragraph_line_count; i++) {
+    else if (para.only_whitespace) {
+        for (int i = 0; i < para.line_count; i++) {
             printf("\n");
         }
     }
     else {
         print_prefix();
+        printf("\n");
     }
-    word_count = 0;
-    paragraph_line_count = 0;
-    prefix_count = 0;
+    para.word_count = 0;
+    para.line_count = 0;
+    para.prefix_count = 0;
     paragraph_count++;
 }
 
 void process_indent () {
     if (convert_to_spaces) {
-        pindent_len = 0;
-        for (int i = 0; i < indent_len; i++) {
-            char c = indent[i];
+        para.pindent_len = 0;
+        for (int i = 0; i < para.indent_len; i++) {
+            char c = para.indent[i];
             if (c == '\t') {
-                pindent_len += 4;
+                para.pindent_len += 4;
             }
             else {
-                pindent_len += 1;
+                para.pindent_len += 1;
             }
         }
-        if (pindent_len > INDENTSIZE) {
+        if (para.pindent_len > INDENTSIZE) {
             fprintf(stderr, "Indent can't be larger than %d characters\n", INDENTSIZE);
             exit(1);
         }
-        for (int i = 0; i < pindent_len; i++) {
-            pindent[i] = ' ';
+        for (int i = 0; i < para.pindent_len; i++) {
+            para.pindent[i] = ' ';
         }
     }
     else {
-        memcpy(pindent, indent, indent_len);
-        pindent_len = indent_len;
-        pindent_width = indent_width;
+        memcpy(para.pindent, para.indent, para.indent_len);
+        para.pindent_len = para.indent_len;
+        para.pindent_width = para.indent_width;
     }
 }
 
 void process_comment () {
     // for comments like "> >>" we collapse the spaces to ">>>"
-    pcomment_len = 0;
-    for (int i = 0; i < comment_len; i++) {
-        char c = comment[i];
+    para.pcomment_len = 0;
+    for (int i = 0; i < para.comment_len; i++) {
+        char c = para.comment[i];
         if (c != ' ') {
-            pcomment[pcomment_len++] = c;
+            para.pcomment[para.pcomment_len++] = c;
         }
     }
 }
@@ -381,125 +413,134 @@ int parse_item (char *str, int str_len) {
     return item_len;
 }
 
-void process_line () {
-    int cur_indent_len = 0;
-    int cur_indent_width = 0;
+void process_line_wrap () {
+    char *indent = line;
+    int indent_len = 0;
+    int indent_width = 0;
     for (int i = 0; i < line_len; i++) {
         char c = line[i];
         if (c == ' ') {
-            cur_indent_len++;
-            cur_indent_width++;
+            indent_len++;
+            indent_width++;
         }
         else if (c == '\t') {
-            cur_indent_len++;
-            cur_indent_width += 4;
+            indent_len++;
+            indent_width += 4;
         }
         else {
             break;
         }
     }
 
-    line_start_len = cur_indent_len;
-    char *cur_comment = line + cur_indent_len;
-    int cur_comment_len = parse_comment(cur_comment, line_len - line_start_len);
-    line_start_len += cur_comment_len;
-    char *cur_item = line + line_start_len;
-    int cur_item_len = 0;
+    char *comment = line + indent_len;
+    int comment_len = parse_comment(comment, line_len - indent_len);
+    int line_start_len = indent_len + comment_len;
 
-    if (cur_comment_len == 0) {
-        cur_item_len = parse_item(cur_item, line_len - line_start_len);
-        line_start_len += cur_item_len;
+    char *item = line + line_start_len;
+    int item_len = 0;
+    if (comment_len == 0) {
+        item_len = parse_item(item, line_len - line_start_len);
+        line_start_len += item_len;
     }
 
-    int cur_paragraph_only_whitespace = 0;
-    if (cur_indent_len == line_len) {
-        cur_paragraph_only_whitespace = 1;
+    int only_whitespace = 0;
+    if (indent_len == line_len) {
+        only_whitespace = 1;
     }
 
-    int expected_indent_width = indent_width;
-    if (item_len) {
-        expected_indent_width += item_len + 1;
+    int expected_indent_width = para.indent_width;
+    if (para.item_len) {
+        expected_indent_width += para.item_len + 1;
     }
 
-    if (!center) {
-        if (line_count) {
-            // if whitespace only para to a regular para and vice versa
-            if (cur_paragraph_only_whitespace ^ paragraph_only_whitespace) {
-                end_paragraph();
-            }
+    int end = 0;
+    if (line_count) {
+        // if whitespace only para to a regular para and vice versa
+        if (only_whitespace ^ para.only_whitespace) {
+            end = 1;
+        }
 
-            // if the indents don't match
-            else if (cur_indent_len < indent_len || strncmp(indent, line, indent_len) != 0) {
-                end_paragraph();
-            }
+        // if the indents don't match
+        else if (indent_len < para.indent_len || strncmp(indent, para.indent, para.indent_len) != 0) {
+            end = 1;
+        }
 
-            // if the indent is not equal to the full width of the line start, for
-            // example a line that starts with:
-            //     - a list item
-            //       more text
-            // the "more text" part is considered still a part of the list item
-            else if (cur_indent_width != expected_indent_width) {
-                end_paragraph();
-            }
+        // if the indent is not equal to the full width of the line start, for
+        // example a line that starts with:
+        //     - a list item
+        //       more text
+        // the "more text" part is considered still a part of the list item
+        else if (indent_width != expected_indent_width) {
+            end = 1;
+        }
 
-            // if the comment starts don't match
-            else if (cur_comment_len != comment_len || strncmp(comment, cur_comment, comment_len) != 0) {
-                end_paragraph();
-            }
+        // if the comment starts don't match
+        else if (comment_len != para.comment_len || strncmp(comment, para.comment, para.comment_len) != 0) {
+            end = 1;
+        }
+
+        // if the line starts a new item
+        else if (item_len) {
+            end = 1;
+        }
+
+        if (end) {
+            end_paragraph();
         }
     }
 
-    if (paragraph_line_count == 0) {
-        if (cur_indent_len > INDENTSIZE) {
+    if (para.line_count == 0) {
+        if (indent_len > INDENTSIZE) {
             fprintf(stderr, "Indent can't be larger than %d characters\n", INDENTSIZE);
             exit(1);
         }
-        memcpy(indent, line, cur_indent_len);
-        indent_len = cur_indent_len;
-        indent_width = cur_indent_width;
+        memcpy(para.indent, indent, indent_len);
+        para.indent_len = indent_len;
+        para.indent_width = indent_width;
         process_indent();
 
-        if (cur_comment_len > COMMENTSIZE) {
+        if (comment_len > COMMENTSIZE) {
             fprintf(stderr, "Comment start can't be larger than %d characters\n", COMMENTSIZE);
             exit(1);
         }
-        memcpy(comment, cur_comment, cur_comment_len);
-        comment_len = cur_comment_len;
+        memcpy(para.comment, comment, comment_len);
+        para.comment_len = comment_len;
         process_comment();
 
-        if (cur_item_len > ITEMSIZE) {
+        if (item_len > ITEMSIZE) {
             fprintf(stderr, "Item start can't be larger than %d characters\n", ITEMSIZE);
             exit(1);
         }
-        memcpy(item, cur_item, cur_item_len);
-        item_len = cur_item_len;
+        memcpy(para.item, item, item_len);
+        para.item_len = item_len;
 
-        line_start_width = indent_width + comment_len + item_len;
+        int line_start_width = indent_width + comment_len + item_len;
         if (comment_len || item_len) {
+            line_start_len++;
             line_start_width++;
         }
 
-        paragraph_only_whitespace = 0;
-        if (cur_indent_len == line_len) {
-            paragraph_only_whitespace = 1;
-        }
+        para.line_start_len = line_start_len;
+        para.line_start_width = line_start_width;
+        para.only_whitespace = only_whitespace;
     }
 
-    if (center) {
-        process_line_center();
-    }
-    else {
-        process_line_wrap();
-    }
+    process_line_words();
+
     line_count++;
-    paragraph_line_count++;
+    para.line_count++;
 }
 
 void process_buf () {
     for (int i = 0; i < buf_len; i++) {
         char c = buf[i];
         if (c == '\n') {
-            process_line();
+            if (center) {
+                process_line_center();
+            }
+            else {
+                process_line_wrap();
+            }
             line_len = 0;
         }
         else {
@@ -513,10 +554,9 @@ void process_buf () {
 }
 
 void process_file (int fd) {
-    word_count = 0;
+    line_count = 0;
     paragraph_count = 0;
-    line_len = 0;
-    indent_len = 0;
+    memset(&para, 0, sizeof(para));
 
     while (1) {
         int retval = read(fd, buf, BUFSIZE);
@@ -533,7 +573,12 @@ void process_file (int fd) {
         }
     }
     if (line_len) {
-        process_line();
+        if (center) {
+            process_line_center();
+        }
+        else {
+            process_line_wrap();
+        }
     }
     end_paragraph();
 
