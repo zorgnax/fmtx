@@ -95,6 +95,7 @@ void process_line_center () {
         int center_len = (width - trimmed_len) / 2;
         printf("%*s%.*s\n", center_len, "", trimmed_len, line + indent_len);
     }
+    line_count++;
 }
 
 void print_prefix () {
@@ -577,7 +578,9 @@ void process_file (int fd) {
             process_line_wrap();
         }
     }
-    end_paragraph();
+    if (!center) {
+        end_paragraph();
+    }
 
     close(fd);
 }

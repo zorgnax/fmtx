@@ -1,12 +1,15 @@
 CFLAGS = -Wall
 
-all: fmtx
+all: fmtx test
 
 fmtx: fmtx.c
 	clang $(CFLAGS) fmtx.c -o fmtx
 
+test: test.c
+	clang $(CFLAGS) test.c -o test
+
 clean:
-	rm -rvf fmtx *.o
+	rm -rvf fmtx test *.o
 
 .PHONY: all clean
 

@@ -1,0 +1,24 @@
+# The format of this file is a line like [fmt -with -args] followed by input
+# followed by a line containing --- then followed by the expected output. The
+# test script will pass the input thru the fmtx program and test the output is
+# expected.
+
+[fmt]
+hello
+---
+hello
+
+[fmt]
+I have learned to walk: since then I have run. I have learned to fly: since then I do not have to be pushed in order to move. Now I am nimble, now I fly, now I see myself under myself, now a god dances within me.
+---
+I have learned to walk: since then I have run. I have learned to fly: since then
+I do not have to be pushed in order to move. Now I am nimble, now I fly, now I
+see myself under myself, now a god dances within me.
+
+[fmt]
+What is the truth,
+but a lie agreed upon.
+---
+What is the truth, but a lie agreed upon.
+
+
