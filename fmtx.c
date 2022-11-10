@@ -98,7 +98,7 @@ void process_line_center () {
     line_count++;
 }
 
-void print_prefix () {
+void print_prefix_nospace () {
     output_width = 0;
     if (para.pindent_len) {
         printf("%.*s", para.pindent_len, para.pindent);
@@ -117,13 +117,15 @@ void print_prefix () {
         }
         output_width += para.item_len;
     }
-    if (para.pcomment_len || para.item_len) {
-        if (para.word_count || !para.line_count) {
-            printf(" ");
-            output_width += 1;
-        }
-    }
     para.prefix_count++;
+}
+
+void print_prefix () {
+    print_prefix_nospace();
+    if (para.pcomment_len || para.item_len) {
+        printf(" ");
+        output_width += 1;
+    }
 }
 
 int get_char_len (char c) {
@@ -211,6 +213,10 @@ void process_word (char *word, int word_len) {
     }
     else {
         for (int i = 0; i < word_len; i++) {
+            if (output_width >= width) {
+                printf("\n");
+                print_prefix();
+            }
             int char_len = get_char_len(word[i]);
             if (i + char_len > word_len) {
                 // the character says it should be longer than it is
@@ -219,10 +225,6 @@ void process_word (char *word, int word_len) {
             printf("%.*s", char_len, word + i);
             i += char_len - 1;
             output_width += 1;
-            if (output_width >= width) {
-                printf("\n");
-                print_prefix();
-            }
         }
     }
 }
@@ -263,7 +265,7 @@ void end_paragraph () {
         }
     }
     else {
-        print_prefix();
+        print_prefix_nospace();
         printf("\n");
     }
     para.word_count = 0;
@@ -512,9 +514,11 @@ void process_line_wrap () {
         memcpy(para.item, item, item_len);
         para.item_len = item_len;
 
-        int line_start_width = indent_width + comment_len + item_len;
+        // line_start_len is the input len that does not include a space after
+        // // (or # or 1.) but line_start_width is the output line start width
+        // that does include the space.
+        int line_start_width = para.pindent_width + para.pcomment_len + para.item_len;
         if (comment_len || item_len) {
-            line_start_len++;
             line_start_width++;
         }
 
@@ -634,6 +638,5 @@ int main (int argc, char **argv) {
 }
 
 // TODO
-// test program
 // create a README
 //

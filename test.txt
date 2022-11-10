@@ -15,10 +15,168 @@ I have learned to walk: since then I have run. I have learned to fly: since then
 I do not have to be pushed in order to move. Now I am nimble, now I fly, now I
 see myself under myself, now a god dances within me.
 
+[fmt -w 40]
+    Whoever does not have two-thirds of his day for himself, is a slave,
+
+        whatever he may be: a statesman, a businessman, an official, or a scholar.
+---
+    Whoever does not have two-thirds of
+    his day for himself, is a slave,
+
+        whatever he may be: a statesman,
+        a businessman, an official, or a
+        scholar.
+
 [fmt]
 What is the truth,
 but a lie agreed upon.
 ---
 What is the truth, but a lie agreed upon.
 
+[fmt -w 20]
+# Poets are shameless with their experiences: they exploit them.
+---
+# Poets are
+# shameless with
+# their experiences:
+# they exploit them.
+
+[fmt]
+# In individuals, insanity is rare;
+# but in groups, parties, nations and epochs, it is the rule.
+---
+# In individuals, insanity is rare; but in groups, parties, nations and epochs,
+# it is the rule.
+
+[fmt -w 40]
+* Is it better to out-monster the monster or to be quietly devoured?
+---
+* Is it better to out-monster the
+  monster or to be quietly devoured?
+
+[fmt -w 40]
+1. But it is the same with man as with the tree.
+2. The more he seeks to rise into the height and light,
+    a. the more vigorously do his roots struggle earthward, downward,
+    b. into the dark, the deep - into evil.
+---
+1. But it is the same with man as with
+   the tree.
+2. The more he seeks to rise into the
+   height and light,
+    a. the more vigorously do his roots
+       struggle earthward, downward,
+    b. into the dark, the deep - into
+       evil.
+
+[fmt -w 40]
+Onelovesultimatelyone'sdesires,notthethingdesired.
+---
+Onelovesultimatelyone'sdesires,notthethi
+ngdesired.
+
+[fmt]
+#
+---
+#
+
+[fmt]
+//All things are subject to interpretation. Whichever interpretation prevails at a given time is a function of power and not truth.
+---
+// All things are subject to interpretation. Whichever interpretation prevails
+// at a given time is a function of power and not truth.
+
+[fmt]
+// Meaning and morality of One's life come from
+// within oneself.
+Healthy, strong individuals seek self-expansion by experimenting and by living dangerously. Life consists of an infinite number of
+# possibilities and the healthy person explores as many of them as possible.
+    // Religions that teach pity, self-contempt, humility, self-restraint, and guilt are incorrect.
+    # The good life is ever-changing, challenging, devoid of regret, intense, creative, and risky.
+---
+// Meaning and morality of One's life come from within oneself.
+Healthy, strong individuals seek self-expansion by experimenting and by living
+dangerously. Life consists of an infinite number of
+# possibilities and the healthy person explores as many of them as possible.
+    // Religions that teach pity, self-contempt, humility, self-restraint, and
+    // guilt are incorrect.
+    # The good life is ever-changing, challenging, devoid of regret, intense,
+    # creative, and risky.
+
+[fmt -w 4]
+☃☃☃☃
+☃☃☃☃
+---
+☃☃☃☃
+☃☃☃☃
+
+[fmt -w 3]
+☃☃☃☃
+☃☃☃☃
+---
+☃☃☃
+☃ ☃
+☃☃☃
+
+[fmt]
+> The strength of a person's spirit would then be measured by how much 'truth' he could tolerate, or more precisely, to what extent he needs to have it diluted, disguised, sweetened, muted, falsified.
+---
+> The strength of a person's spirit would then be measured by how much 'truth'
+> he could tolerate, or more precisely, to what extent he needs to have it
+> diluted, disguised, sweetened, muted, falsified.
+
+[fmt]
+> >> > I change too quickly: my today refutes my yesterday. When I ascend I often jump over steps, and no step forgives me that.
+---
+>>>> I change too quickly: my today refutes my yesterday. When I ascend I often
+>>>> jump over steps, and no step forgives me that.
+
+[fmt]
+- Knowledge kills action;
+- action requires the veils of illusion.
+---
+- Knowledge kills action;
+- action requires the veils of illusion.
+
+[fmt]
+#
+# In the end things must be as they are and have always been--the great things remain for the great, the abysses for the profound, the delicacies and thrills for the refined, and, to sum up shortly, everything rare for the rare.
+---
+# In the end things must be as they are and have always been--the great things
+# remain for the great, the abysses for the profound, the delicacies and thrills
+# for the refined, and, to sum up shortly, everything rare for the rare.
+
+[fmt]
+* He who cannot obey himself
+  will be commanded.
+That is the nature of living creatures.
+---
+* He who cannot obey himself will be commanded.
+That is the nature of living creatures.
+
+[fmt]
+# I assess the power of a will by how much resistance, pain,
+#
+# torture it endures and knows how to turn to its advantage.
+---
+# I assess the power of a will by how much resistance, pain, torture it endures
+# and knows how to turn to its advantage.
+
+[fmt -c]
+The end of a melody is not its goal:
+but nonetheless,
+had the melody not reached its end
+it would not have reached its goal either.
+A parable.
+---
+                      The end of a melody is not its goal:
+                                but nonetheless,
+                       had the melody not reached its end
+                   it would not have reached its goal either.
+                                   A parable.
+
+[fmt]
+There is an old illusion. It is called good and evil.
+---
+There is an old illusion. It is called good and evil.
 
