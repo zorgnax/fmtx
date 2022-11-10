@@ -1,0 +1,45 @@
+Usage: fmtx [options] file...
+
+Options:
+    -c        center on line
+    -h        help text
+    -w width  width of line
+
+This program will wrap text to a given width (default 80).
+
+It maintains the indent.
+
+It maintains the initial comment:
+
+    # like shell comments
+    // or C comments
+    >> or email quotations
+
+It maintains bullets and numbering:
+
+    * like this
+    - or this
+    1. or like this
+    a. or this
+    IX. or this
+
+In the original fmt program, if you edit a comment like this:
+
+    # comment here thats too long for one line
+
+It wouldn't print the comment on the wrapped line:
+
+    # comment here thats
+    too long for one line
+
+If you edited a comment already on multiple lines, it would put the # somewhere in the middle of a line:
+
+    # comment here thats
+    # on several
+    # lines
+
+Like this:
+
+    # comment here thats # on several #
+    lines
+
