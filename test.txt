@@ -180,3 +180,16 @@ There is an old illusion. It is called good and evil.
 ---
 There is an old illusion. It is called good and evil.
 
+[fmt -s]
+	Hope in reality is the worst of all evils because it prolongs the torments of man.
+---
+    Hope in reality is the worst of all evils because it prolongs the torments of
+    man.
+
+[fmt]
+	We should consider every day lost on which we have not danced at least once. And we should call every truth false which was not accompanied by at least one laugh.
+---
+	We should consider every day lost on which we have not danced at least once.
+	And we should call every truth false which was not accompanied by at least
+	one laugh.
+

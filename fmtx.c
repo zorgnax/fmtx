@@ -61,6 +61,7 @@ void usage () {
         "Options:\n"
         "    -c        center on line\n"
         "    -h        help text\n"
+        "    -s        replace tabs with spaces\n"
         "    -w width  width of line\n";
     puts(str);
     exit(0);

@@ -3,6 +3,7 @@ Usage: fmtx [options] file...
 Options:
     -c        center on line
     -h        help text
+    -s        replace tabs with spaces
     -w width  width of line
 
 This program will wrap text to a given width (default 80).
