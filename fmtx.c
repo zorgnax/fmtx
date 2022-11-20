@@ -200,7 +200,7 @@ void process_word (char *word, int word_len) {
     // and at least one character can fit on the current line
     else if (para.line_start_width + word_width > width && output_width + 1 < width) {
         // if were not at the start of the line
-        if (output_width > para.line_start_width) {
+        if (break_long_words && output_width > para.line_start_width) {
             printf(" ");
             output_width++;
         }
@@ -230,6 +230,16 @@ void process_word (char *word, int word_len) {
             output_width += 1;
         }
     }
+    // word is longer than can fit on a line, so if were not the first word on
+    // the line, we add a newline and print the entire word
+    else if (output_width > para.line_start_width) {
+        printf("\n");
+        print_prefix();
+        printf("%.*s", word_len, word);
+        output_width += word_width;
+    }
+    // word is longer than can fit on a line, and we're at the beginning of the
+    // line, so print it here
     else {
         printf("%.*s", word_len, word);
         output_width += word_width;

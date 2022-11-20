@@ -205,3 +205,9 @@ There is an old illusion. It is called good and evil.
 	And we should call every truth false which was not accompanied by at least
 	one laugh.
 
+[fmt -w 10]
+    Silence isworse;alltruthsthatarekeptsilentbecomepoisonous.
+---
+    Silence
+    isworse;alltruthsthatarekeptsilentbecomepoisonous.
+
