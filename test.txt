@@ -69,11 +69,16 @@ What is the truth, but a lie agreed upon.
     b. into the dark, the deep - into
        evil.
 
-[fmt -w 40]
+[fmt -w 40 -b]
 Onelovesultimatelyone'sdesires,notthethingdesired.
 ---
 Onelovesultimatelyone'sdesires,notthethi
 ngdesired.
+
+[fmt -w 40]
+Whenyougazelongintoanabysstheabyssalsogazesintoyou.
+---
+Whenyougazelongintoanabysstheabyssalsogazesintoyou.
 
 [fmt]
 #
@@ -110,13 +115,20 @@ dangerously. Life consists of an infinite number of
 ☃☃☃☃
 ☃☃☃☃
 
-[fmt -w 3]
+[fmt -w 3 -b]
 ☃☃☃☃
 ☃☃☃☃
 ---
 ☃☃☃
 ☃ ☃
 ☃☃☃
+
+[fmt -w 3]
+☃☃☃☃
+☃☃☃☃
+---
+☃☃☃☃
+☃☃☃☃
 
 [fmt]
 > The strength of a person's spirit would then be measured by how much 'truth' he could tolerate, or more precisely, to what extent he needs to have it diluted, disguised, sweetened, muted, falsified.

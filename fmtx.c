@@ -9,6 +9,7 @@
 int width = 80;
 int center = 0;
 int convert_to_spaces = 0;
+int break_long_words = 0;
 
 int paragraph_count = 0;
 int line_count = 0;
@@ -59,6 +60,7 @@ void usage () {
         "Usage: fmtx [options] file...\n"
         "\n"
         "Options:\n"
+        "    -b        break long words\n"
         "    -c        center on line\n"
         "    -h        help text\n"
         "    -s        replace tabs with spaces\n"
@@ -212,7 +214,7 @@ void process_word (char *word, int word_len) {
         printf("%.*s", word_len, word);
         output_width += word_width;
     }
-    else {
+    else if (break_long_words) {
         for (int i = 0; i < word_len; i++) {
             if (output_width >= width) {
                 printf("\n");
@@ -227,6 +229,10 @@ void process_word (char *word, int word_len) {
             i += char_len - 1;
             output_width += 1;
         }
+    }
+    else {
+        printf("%.*s", word_len, word);
+        output_width += word_width;
     }
 }
 
@@ -592,27 +598,31 @@ void process_file (int fd) {
 
 int main (int argc, char **argv) {
     struct option longopts[] = {
-        {"w", required_argument, NULL, 'w'},
+        {"b", no_argument, NULL, 'b'},
         {"c", no_argument, NULL, 'c'},
-        {"s", no_argument, NULL, 's'},
         {"h", no_argument, NULL, 'h'},
+        {"s", no_argument, NULL, 's'},
+        {"w", required_argument, NULL, 'w'},
         {NULL, 0, NULL, 0}
     };
 
     int c;
     while ((c = getopt_long_only(argc, argv, "", longopts, NULL)) != -1) {
         switch (c) {
-        case 'w':
-            width = atoi(optarg);
+        case 'b':
+            break_long_words = 1;
             break;
         case 'c':
             center = 1;
             break;
+        case 'h':
+            usage();
+            break;
         case 's':
             convert_to_spaces = 1;
             break;
-        case 'h':
-            usage();
+        case 'w':
+            width = atoi(optarg);
             break;
         default:
             exit(1);

@@ -1,6 +1,7 @@
 Usage: fmtx [options] file...
 
 Options:
+    -b        break long words
     -c        center on line
     -h        help text
     -s        replace tabs with spaces
